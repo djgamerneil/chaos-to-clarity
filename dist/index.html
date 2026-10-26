@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Clarity — a living drawing</title>
+  <script type="module" crossorigin src="/assets/index-BBjnBjt8.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-DSKcf1cj.css">
+</head>
+<body>
+  <!-- WebGL canvas is appended here by app.js -->
+  <div id="stage"></div>
+  <div id="vignette"></div>
+  <div id="flash"></div>
+
+  <!-- Storyboard captions, faded in and out by the timeline -->
+  <p id="caption" aria-live="polite"></p>
+
+  <!-- Cinematic controls (hidden until the visitor taps in) -->
+  <div id="controls">
+    <button id="mute" type="button" aria-pressed="false">Sound on</button>
+    <button id="skip" type="button">Skip to sanctuary</button>
+  </div>
+
+  <!-- Audio can only start after a user gesture, so a quiet gate comes first -->
+  <div id="gate" role="dialog" aria-labelledby="gate-title">
+    <h1 id="gate-title">Clarity</h1>
+    <p>Best experienced with headphones.</p>
+    <button id="begin" type="button" disabled>Loading…</button>
+    <p id="status" role="status"></p>
+  </div>
+
+</body>
+</html>
