@@ -42,6 +42,12 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 
 PixiJS and GSAP come from npm and are bundled by Vite, so the page must be run through Vite (or built). Opening `index.html` directly, or with Live Server, will not resolve the imports.
 
+## Deploy to GitHub Pages
+
+The `.github/workflows/pages.yml` workflow builds and deploys the site to GitHub Pages whenever changes are pushed to `main` (or when started manually from the Actions tab). The Pages-specific Vite base path is configured by `npm run build:pages` for this repository's URL path.
+
+In the repository settings, set **Settings → Pages → Build and deployment → Source** to **GitHub Actions**. After the workflow completes, GitHub Pages will show the live site URL on that settings page.
+
 ## The journey
 
 The visitor's tap on the gate starts the cinematic (browsers block audio until a gesture). It runs 49 seconds, then the sanctuary loops indefinitely. `STORYBOARD_TIMELINE.md` is the cue sheet; the code mirrors it in `journey()`.
