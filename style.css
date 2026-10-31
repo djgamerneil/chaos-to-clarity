@@ -7,7 +7,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
-  width: 100%; height: 100%;
+  height: 100%;
   overflow: hidden;
   background: var(--paper);
   color: var(--ink);
@@ -15,16 +15,11 @@ html, body {
   -webkit-tap-highlight-color: transparent;
   touch-action: none;
   overscroll-behavior: none;
-  /* Prevent iOS rubber-band scroll */
-  position: fixed;
 }
 
-/* WebGL canvas fills the real viewport — dvh accounts for mobile browser chrome */
-#stage {
-  position: fixed; inset: 0;
-  width: 100%; height: 100vh; height: 100dvh;
-}
-#stage canvas { display: block; width: 100% !important; height: 100% !important; }
+/* WebGL canvas fills the real viewport (dvh handles mobile browser chrome) */
+#stage { position: fixed; inset: 0; height: 100vh; height: 100dvh; }
+#stage canvas { display: block; width: 100%; height: 100%; }
 
 #vignette {
   position: fixed; inset: 0; z-index: 4; pointer-events: none;
@@ -38,110 +33,47 @@ html, body {
 /* ---------- Captions ---------- */
 #caption {
   position: fixed; z-index: 6; left: 50%; translate: -50% 0;
-  /* Push up enough to clear mobile home-bar + give breathing room */
-  bottom: calc(env(safe-area-inset-bottom, 0px) + max(10vh, 3.5rem));
+  bottom: calc(env(safe-area-inset-bottom) + 12vh);
   width: max-content; max-width: calc(100vw - 2rem);
   padding: .35em .9em; border-radius: 999px;
   text-align: center; pointer-events: none;
   color: var(--ink); background: rgba(255, 255, 255, .85);
-  /* Slightly larger text floor on small phones */
-  font: italic clamp(1rem, 3.8vw + .3rem, 1.7rem)/1.3 var(--serif); letter-spacing: .03em;
+  font: italic clamp(1.15rem, 4.2vw, 1.7rem)/1.3 var(--serif); letter-spacing: .03em;
   visibility: hidden; opacity: 0;
 }
 
-/* ---------- Controls (mute / skip) ---------- */
+/* ---------- Mute / skip ---------- */
 #controls {
   position: fixed; z-index: 7;
-  /* Respect the notch / status bar */
-  top: calc(env(safe-area-inset-top, 0px) + .75rem);
-  right: calc(env(safe-area-inset-right, 0px) + .75rem);
-  display: flex; gap: .45rem;
+  top: calc(env(safe-area-inset-top) + .9rem); right: 1rem;
+  display: flex; gap: .5rem;
 }
 #controls button {
-  /* Minimum 44 × 44 px tap target (Apple/WCAG guideline) */
-  min-height: 44px; min-width: 44px;
-  padding: .5rem 1rem; cursor: pointer;
-  font: clamp(.78rem, 2vw, .85rem)/1 var(--serif); color: var(--ink);
-  background: rgba(255, 255, 255, .88); border: 1px solid var(--ink); border-radius: 999px;
-  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  padding: .45rem .95rem; cursor: pointer;
+  font: .85rem/1 var(--serif); color: var(--ink);
+  background: rgba(255, 255, 255, .85); border: 1px solid var(--ink); border-radius: 999px;
   visibility: hidden; opacity: 0;
-  /* Active state for touch feedback */
-  transition: background .15s, color .15s;
 }
-#controls button:active { background: var(--ink); color: var(--paper); }
 #controls button:hover, #controls button:focus-visible { background: var(--ink); color: var(--paper); outline: none; }
-
-/* ---------- Rotate-to-landscape hint ---------- */
-#rotate-hint {
-  position: fixed; inset: 0; z-index: 8;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: .9rem;
-  background: rgba(255,255,255,.95);
-  color: var(--ink);
-  font: italic clamp(1rem, 5vw, 1.4rem)/1.4 var(--serif);
-  text-align: center;
-  padding: 2rem;
-  /* Hidden by default; shown via JS when in portrait + mobile */
-  visibility: hidden; opacity: 0;
-  transition: opacity .4s ease, visibility .4s;
-  pointer-events: none;
-}
-#rotate-hint svg {
-  width: clamp(2.5rem, 12vw, 4rem);
-  height: auto;
-  animation: rotate-nudge 1.8s ease-in-out infinite;
-}
-@keyframes rotate-nudge {
-  0%, 100% { transform: rotate(-15deg); }
-  50%       { transform: rotate(15deg); }
-}
-#rotate-hint.visible { visibility: visible; opacity: 1; pointer-events: auto; }
 
 /* ---------- Entry gate ---------- */
 #gate {
   position: fixed; inset: 0; z-index: 10;
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1.1rem;
-  /* Safe-area padding so content never hides behind notch / home bar */
-  padding: calc(env(safe-area-inset-top, 0px) + 1.5rem)
-           calc(env(safe-area-inset-right, 0px) + 1.5rem)
-           calc(env(safe-area-inset-bottom, 0px) + 1.5rem)
-           calc(env(safe-area-inset-left, 0px) + 1.5rem);
+  padding: env(safe-area-inset-top) 1.5rem env(safe-area-inset-bottom);
   text-align: center;
   background: rgba(255, 255, 255, .92);
   transition: opacity 1.2s ease, visibility 1.2s;
 }
 #gate.gone { opacity: 0; visibility: hidden; pointer-events: none; }
-#gate h1 {
-  font-weight: 400; font-style: italic;
-  font-size: clamp(2.4rem, 10vw, 5rem); letter-spacing: .02em;
-}
-#gate p { max-width: 32ch; line-height: 1.5; font-size: clamp(.9rem, 2.8vw, 1.05rem); }
+#gate h1 { font-weight: 400; font-style: italic; font-size: clamp(2.6rem, 9vw, 5rem); letter-spacing: .02em; }
+#gate p { max-width: 32ch; line-height: 1.5; }
 #begin {
-  margin-top: .8rem;
-  /* Generous tap target on mobile */
-  padding: max(.85rem, 14px) max(2.2rem, 28px);
-  cursor: pointer;
-  font: inherit; font-size: clamp(.95rem, 3vw, 1.1rem);
-  color: var(--ink); background: transparent;
+  margin-top: .8rem; padding: .85rem 2.2rem; cursor: pointer;
+  font: inherit; color: var(--ink); background: transparent;
   border: 1.5px solid var(--ink); border-radius: 999px;
   transition: background .25s, color .25s, opacity .25s;
-  min-height: 48px;
 }
-#begin:not(:disabled):hover,
-#begin:not(:disabled):active,
-#begin:focus-visible { background: var(--ink); color: var(--paper); outline: none; }
+#begin:not(:disabled):hover, #begin:focus-visible { background: var(--ink); color: var(--paper); outline: none; }
 #begin:disabled { opacity: .5; cursor: default; }
-#status { min-height: 3em; font-size: clamp(.85rem, 2.5vw, .95rem); font-weight: 600; }
-
-/* ---- Landscape-specific tweaks for small phones ---- */
-@media (orientation: landscape) and (max-height: 500px) {
-  #gate { gap: .6rem; }
-  #gate h1 { font-size: clamp(1.6rem, 7vh, 3rem); }
-  #begin { padding: .6rem 1.8rem; }
-  #caption { bottom: calc(env(safe-area-inset-bottom, 0px) + 1rem); }
-}
-
-/* ---- Pointer: coarse = touch device → bigger interactive targets ---- */
-@media (pointer: coarse) {
-  #controls button { min-height: 48px; min-width: 48px; padding: .6rem 1.1rem; }
-}
+#status { min-height: 3em; font-size: .95rem; font-weight: 600; }

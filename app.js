@@ -27,59 +27,6 @@ import { gsap } from 'gsap';
 
   const $ = (s) => document.querySelector(s);
 
-  /* ─────────────── FULLSCREEN / IMMERSIVE ─────────────── */
-  // Request fullscreen using whatever vendor prefix the browser supports.
-  // Called once the animation loads in landscape orientation.
-  const fsAPI = (() => {
-    const el = document.documentElement;
-    if (el.requestFullscreen)             return { req: () => el.requestFullscreen({ navigationUI: 'hide' }), exit: () => document.exitFullscreen?.() };
-    if (el.webkitRequestFullscreen)       return { req: () => el.webkitRequestFullscreen(), exit: () => document.webkitExitFullscreen?.() };
-    if (el.mozRequestFullScreen)          return { req: () => el.mozRequestFullScreen(), exit: () => document.mozCancelFullScreen?.() };
-    if (el.msRequestFullscreen)           return { req: () => el.msRequestFullscreen(), exit: () => document.msExitFullscreen?.() };
-    return null; // browser doesn't support it
-  })();
-
-  let fsRequested = false;
-
-  // Try to lock screen orientation to landscape for an immersive experience.
-  function tryLockLandscape() {
-    const screen = window.screen;
-    try {
-      if (screen.orientation && screen.orientation.lock) {
-        screen.orientation.lock('landscape').catch(() => {/* silently ignore — iOS ignores this */});
-      }
-    } catch (_) {}
-  }
-
-  // Enter fullscreen + lock orientation. Only fires once per page-load.
-  function requestImmersive() {
-    if (fsRequested || !fsAPI) return;
-    fsRequested = true;
-    tryLockLandscape();
-    fsAPI.req().catch(() => {/* user or browser declined — gracefully skip */});
-  }
-
-  // Check orientation and decide whether to nudge the user.
-  const rotateHint = document.getElementById('rotate-hint');
-  const isMobileDevice = () => /Mobi|Android|iPhone|iPad|iPod|Touch/i.test(navigator.userAgent)
-                             || window.matchMedia('(pointer: coarse)').matches;
-  const isLandscape = () => window.innerWidth > window.innerHeight;
-
-  function updateOrientationUI() {
-    if (!isMobileDevice()) { rotateHint.classList.remove('visible'); return; }
-    if (isLandscape()) {
-      rotateHint.classList.remove('visible');
-    } else {
-      // Only show the hint AFTER the gate is gone (i.e. the animation has started)
-      if (document.getElementById('gate').classList.contains('gone')) {
-        rotateHint.classList.add('visible');
-      }
-    }
-  }
-
-  window.addEventListener('resize', updateOrientationUI);
-  window.addEventListener('orientationchange', updateOrientationUI);
-
   /* Animated state — GSAP tweens these, the ticker feeds them to the shaders */
   const S   = { bgSpeed: 1.4, bgAmp: 0.02, wave: 0.0035, chInt: 0, chSpeed: 1, shake: 0, react: 0, parallax: 0 };
   const cam = { x: 0.5, y: 0.5, zoom: 1, kick: 0 };      // camera in artwork space (0–1)
@@ -361,16 +308,10 @@ import { gsap } from 'gsap';
     app.stage.addChild(paperBg, world, video || neon);
 
     app.ticker.add(tick);
-
-    // Pointer parallax — works for both mouse and touch
-    const onPointer = (e) => {
-      // Use first touch if available, else fall back to mouse coords
-      const src = (e.touches && e.touches.length > 0) ? e.touches[0] : e;
-      par.tx = (src.clientX / window.innerWidth)  * 2 - 1;
-      par.ty = (src.clientY / window.innerHeight) * 2 - 1;
-    };
-    window.addEventListener('pointermove', onPointer, { passive: true });
-    window.addEventListener('touchmove',  onPointer, { passive: true });
+    window.addEventListener('pointermove', (e) => {
+      par.tx = (e.clientX / window.innerWidth) * 2 - 1;
+      par.ty = (e.clientY / window.innerHeight) * 2 - 1;
+    });
 
     begin.textContent = 'Tap to begin'; begin.disabled = false;
     begin.addEventListener('click', start, { once: true });
@@ -443,30 +384,6 @@ import { gsap } from 'gsap';
       $('#mute').setAttribute('aria-pressed', String(audio.muted));
       $('#mute').textContent = audio.muted ? 'Sound off' : 'Sound on';
     });
-
-    // ── Fullscreen for immersive mobile experience ──
-    // The "begin" tap is a user gesture, so we can request fullscreen right here.
-    // On landscape → go fullscreen immediately.
-    // On portrait  → show the rotate hint; requestImmersive() is called once the
-    //                user (or device) switches to landscape.
-    if (isLandscape()) {
-      requestImmersive();
-    } else {
-      updateOrientationUI();   // shows the rotate hint
-
-      // Watch for the user rotating to landscape, then fire fullscreen once
-      const onRotate = () => {
-        if (isLandscape()) {
-          window.removeEventListener('resize', onRotate);
-          window.removeEventListener('orientationchange', onRotate);
-          updateOrientationUI();
-          requestImmersive();
-        }
-      };
-      window.addEventListener('resize', onRotate);
-      window.addEventListener('orientationchange', onRotate);
-    }
-
     journey();
   }
 
