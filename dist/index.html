@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#000000">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>Clarity — a living drawing</title>
-  <script type="module" crossorigin src="/assets/index-BBjnBjt8.js"></script>
-  <link rel="stylesheet" crossorigin href="/assets/index-DSKcf1cj.css">
+  <script type="module" crossorigin src="/assets/index-DyL8QKl5.js"></script>
+  <link rel="stylesheet" crossorigin href="/assets/index-CHDAwOvV.css">
 </head>
 <body>
   <!-- WebGL canvas is appended here by app.js -->
@@ -20,13 +23,22 @@
   <!-- Cinematic controls (hidden until the visitor taps in) -->
   <div id="controls">
     <button id="mute" type="button" aria-pressed="false">Sound on</button>
-    <button id="skip" type="button">Skip to sanctuary</button>
+    <button id="skip" type="button">Skip</button>
+  </div>
+
+  <!-- Fullscreen nudge shown only on portrait mobile -->
+  <div id="rotate-hint" aria-hidden="true">
+    <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="6" y="10" width="20" height="28" rx="3" stroke="currentColor" stroke-width="2"/>
+      <path d="M30 18 L40 24 L30 30" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>Rotate for full experience</span>
   </div>
 
   <!-- Audio can only start after a user gesture, so a quiet gate comes first -->
   <div id="gate" role="dialog" aria-labelledby="gate-title">
     <h1 id="gate-title">Clarity</h1>
-    <p>Best experienced with headphones.</p>
+    <p>Best experienced with headphones in landscape.</p>
     <button id="begin" type="button" disabled>Loading…</button>
     <p id="status" role="status"></p>
   </div>
